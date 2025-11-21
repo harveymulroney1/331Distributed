@@ -108,7 +108,9 @@ public class FrontEndImpl extends AuctionServiceGrpc.AuctionServiceImplBase {
             }
             // Otherwise, map fields to a gRPC Item and return it.
         } catch (Exception e) {
-            resp.onError(e);
+            resp.onNext(Item.newBuilder().setItemId(0).setName("").setDescription("").setReservePrice(0).setHighestBid(0).build())
+            resp.onCompleted();
+            
         }
 
 

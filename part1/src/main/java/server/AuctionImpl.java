@@ -103,8 +103,10 @@ public class AuctionImpl extends UnicastRemoteObject implements Auction {
         }
         // - Check owner: only creator can close; if not owner, return null.
         AuctionItem i = items.get(itemID);
-        if(itemOwners.get(itemID)==userID)
+        if(itemOwners.get(itemID)==userID && !closedItems.containsKey(itemID))
         {
+            closedItems.put(itemID,i);
+            items.remove(itemID);
             return new AuctionResult(itemID, itemsHighBidders.get(itemID), i.highestBid);
         }
         // - Mark item as closed (add to closedItems) and remove from active items map.
