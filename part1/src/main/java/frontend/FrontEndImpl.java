@@ -49,7 +49,9 @@ public class FrontEndImpl extends AuctionServiceGrpc.AuctionServiceImplBase {
             resp.onNext(BidReply.newBuilder().setSuccess(success).build());
             resp.onCompleted();
         } catch (Exception e) {
-            resp.onError(e);
+            resp.onNext(BidReply.newBuilder().setSuccess(false).build());
+            resp.onCompleted();
+            
         }
         // Build and return a BidReply with success=true/false.
     }
@@ -119,12 +121,14 @@ public class FrontEndImpl extends AuctionServiceGrpc.AuctionServiceImplBase {
             server.AuctionResult res = auction.closeAuction(req.getUserId(), req.getItemId());
             if(res==null)
             {
-                return;
+                resp.onNext(AuctionResult.newBuilder().setItemId(0).setWinningUser(0).setPrice(0).build());
+                resp.onCompleted();
             }          
-            resp.onNext(frontend.AuctionResult.newBuilder().setItemId(res.itemID).setWinningUser(res.winningUser).setPrice(res.price).build()); 
+            resp.onNext(AuctionResult.newBuilder().setItemId(res.itemID).setWinningUser(res.winningUser).setPrice(res.price).build()); 
             resp.onCompleted();
         } catch (Exception e) {
-            resp.onError(e);
+            resp.onNext(AuctionResult.newBuilder().setItemId(0).setWinningUser(0).setPrice(0).build());
+            resp.onCompleted();
         }
         
         // If the result is null (e.g., wrong owner or already closed), return

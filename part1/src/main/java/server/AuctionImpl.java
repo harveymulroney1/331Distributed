@@ -14,6 +14,7 @@ public class AuctionImpl extends UnicastRemoteObject implements Auction {
     ConcurrentHashMap<Integer,AuctionItem> items;
     ConcurrentHashMap<Integer,AuctionItem> closedItems;
     ConcurrentHashMap<Integer,Integer> itemOwners;
+    ConcurrentHashMap<Integer,Integer> itemsHighBidders;
     
     public AuctionImpl() throws RemoteException { 
         super();
@@ -24,6 +25,7 @@ public class AuctionImpl extends UnicastRemoteObject implements Auction {
         items = new ConcurrentHashMap<Integer,AuctionItem>();
         itemOwners = new ConcurrentHashMap<Integer,Integer>();
         closedItems = new ConcurrentHashMap<Integer,AuctionItem>();
+        itemsHighBidders = new ConcurrentHashMap<Integer,Integer>();
 
     }
 
@@ -78,17 +80,18 @@ public class AuctionImpl extends UnicastRemoteObject implements Auction {
         // - If item missing OR user unknown OR item already closed -> return false.
         if(!items.containsKey(itemID) || !users.containsKey(userID) || closedItems.containsKey(itemID))
         {
-            AuctionItem i = items.get(itemID);
-            if(price>i.highestBid && price>=i.reservePrice){
-                i.highestBid = price;
-                i.highestBidder = userID;
-                return true;
-            }
+            return false;
         }
         // - If price > current highestBid AND price >= reservePrice:
         //     - Update highestBid and return true.
         // - Otherwise, return false to indicate unsuccessful bid.
-        return false;
+                    AuctionItem i = items.get(itemID);
+        if(price>i.highestBid && price>=i.reservePrice){
+            i.highestBid = price;
+            itemsHighBidders.put(i.itemID,userID); // highest bidder
+            return true;
+        }
+            return false;
     }
 
     @Override
@@ -102,7 +105,7 @@ public class AuctionImpl extends UnicastRemoteObject implements Auction {
         AuctionItem i = items.get(itemID);
         if(itemOwners.get(itemID)==userID)
         {
-            return new AuctionResult(itemID, i.highestBidder, i.highestBid);
+            return new AuctionResult(itemID, itemsHighBidders.get(itemID), i.highestBid);
         }
         // - Mark item as closed (add to closedItems) and remove from active items map.
         // - Return AuctionResult(itemID, winningUser=userID, price=highestBid).

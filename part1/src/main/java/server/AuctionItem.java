@@ -7,10 +7,9 @@ public class AuctionItem implements Serializable {
     public final String description;
     public final int reservePrice;
     public int highestBid;
-    public int highestBidder;
 
     public AuctionItem(int id, String n, String d, int r) {
         this.itemID = id; this.name = n; this.description = d;
-        this.reservePrice = r; this.highestBid = 0; this.highestBidder =0;
+        this.reservePrice = r; this.highestBid = 0;
     }
 }
