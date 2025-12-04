@@ -205,6 +205,28 @@ public class FrontEndImpl extends AuctionServiceGrpc.AuctionServiceImplBase impl
     private synchronized void electNewLeader() {
         //TODO:
         // probe all members, pick the replica that reports the highest lastCommitted (if tie → pick any)
+
+        try {
+            long highest = 0; // last commited
+            String highestUser = "";
+            for(String user : members)
+            {
+                ReplicatedAuction auc = lookup(user);
+                if(auc.getLastCommittedSeqNo()>highest){
+                    highestUser = user;
+                    highest = auc.getLastCommittedSeqNo();
+                }
+                auc.setSequencer(false);
+            }
+            ReplicatedAuction newLeader = lookup(highestUser);
+            newLeader.setSequencer(true);
+            sequencer = newLeader;
+            sequencerName = highestUser;
+            
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+
         // Call setSequencer(true) on the selected replica (optionally call setSequencer(false) on the others)
 
         System.out.println("Elected new sequencer: " + sequencerName);
