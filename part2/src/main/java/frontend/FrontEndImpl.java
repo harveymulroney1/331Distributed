@@ -14,7 +14,7 @@ public class FrontEndImpl extends AuctionServiceGrpc.AuctionServiceImplBase impl
     //TODO:
     // Add state variables
     private volatile String sequencerName = null;
-
+    
     // === FrontEndAdmin ===
     @Override 
     public String getCurrentSequencerName() throws RemoteException 
