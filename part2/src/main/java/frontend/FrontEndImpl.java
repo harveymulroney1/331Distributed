@@ -40,6 +40,7 @@ public class FrontEndImpl extends AuctionServiceGrpc.AuctionServiceImplBase impl
                 sequencer.setSequencer(true);
             }
         } catch (Exception e) {
+            System.out.println("Caught an Error on Register Replica");
             // TODO: handle exception
         }
         System.out.println("Registered replica " + rmiName + "; leader=" + sequencerName);
@@ -116,17 +117,20 @@ public class FrontEndImpl extends AuctionServiceGrpc.AuctionServiceImplBase impl
     public void register(RegisterRequest req, StreamObserver<RegisterReply> resp) {
 
         // Step 1: Lookup the current sequencer (leader)req
+        System.out.println("Registering");
+
         try {
-            ReplicatedAuction leader = lookupLeader();
+            //ReplicatedAuction leader = sequencer();
             Operation op = Operation.register(req.getEmail());
-            OperationResult res = leader.handleClientOperation(op,members);
+            OperationResult res = sequencer.handleClientOperation(op,members);
             resp.onNext(RegisterReply.newBuilder().setUserId(res.userId).build());
             resp.onCompleted();
         } catch (Exception e) {
             // TODO: handle exception
-            
+            System.out.println("Error on registering");
+            e.printStackTrace();
             electNewLeader();
-            register(req,resp);
+            //register(req,resp);
         }
         // Step 2: Create an Operation object (you can do: op = Operation.register(req.getEmail()))
         // Step 3: Call the handleClientOperation on the leader, passing the operation and current list of members (including leader)
@@ -146,8 +150,10 @@ public class FrontEndImpl extends AuctionServiceGrpc.AuctionServiceImplBase impl
             resp.onCompleted();
         } catch (Exception e) {
             // TODO: handle exception
+            System.out.println("Error on new Auction");
+            e.printStackTrace();
             electNewLeader();
-            newAuction(req,resp);
+            //newAuction(req,resp);
         }
         // Step 2: Create an Operation object (you can do: op = Operation.newAuction(...))
         // Step 3: Call the handleClientOperation on the leader, passing the operation and current list of members (including leader)
@@ -168,8 +174,10 @@ public class FrontEndImpl extends AuctionServiceGrpc.AuctionServiceImplBase impl
         resp.onCompleted();
         // Step 4: Collect OperationResult returned by the call and return it back to the client using gRPC
         } catch (Exception e) {
+            System.out.println("Error on Bid");
+            e.printStackTrace();
             electNewLeader();
-            bid(req,resp);
+            //bid(req,resp);
         }
         // NOTE: you must handle leader failure (elect new one and repeat step 3 on the new leader)
     }
@@ -194,7 +202,9 @@ public class FrontEndImpl extends AuctionServiceGrpc.AuctionServiceImplBase impl
         } catch (Exception e) {
             // TODO: handle exception
             electNewLeader();
-            closeAuction(req, resp);
+            System.out.println("Error on Close Auction");
+            e.printStackTrace();
+            //closeAuction(req, resp);
         }
        
         // NOTE: you must handle leader failure (elect new one and repeat step 3 on the new leader)
@@ -225,6 +235,8 @@ public class FrontEndImpl extends AuctionServiceGrpc.AuctionServiceImplBase impl
             
         } catch (Exception e) {
             // TODO: handle exception
+            System.out.println("Error on Elect New Leader");
+            e.printStackTrace();
         }
 
         // Call setSequencer(true) on the selected replica (optionally call setSequencer(false) on the others)

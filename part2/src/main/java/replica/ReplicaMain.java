@@ -21,7 +21,6 @@ public class ReplicaMain {
         System.out.println("Replica " + id + " bound as " + name);
         FrontEndAdmin fe = (FrontEndAdmin) reg.lookup("FrontEnd");
         String leaderStr = fe.getCurrentSequencerName(); // leader
-        //TODO (suggested high-level steps):
         // Step 1: Ask the front-end to find out who the current sequencer (leader) is. If the answer is null (no leader), then register with the front-end (registerReplica)
         
         //String leaderStr = fe.getCurrentSequencerName();
@@ -57,6 +56,8 @@ public class ReplicaMain {
         
         
         //NOTE: you may skip steps 1--3 and only do step 4 in which case criterion 2.3 will not be satisfied
+        Thread.sleep(Long.MAX_VALUE);
+        System.out.println("Never be reached");
 
     }
 }

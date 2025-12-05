@@ -34,13 +34,14 @@ public class AuctionClient {
         boolean success1 = stub.bid(BidRequest.newBuilder().setItemId(auc1).setUserId(carol).setPrice(5).build()).getSuccess();
         boolean success2 = stub.bid(BidRequest.newBuilder().setItemId(auc2).setUserId(alice).setPrice(56).build()).getSuccess();
         boolean success3 = stub.bid(BidRequest.newBuilder().setItemId(auc3).setUserId(bob).setPrice(28).build()).getSuccess();
+        
         System.out.println("Item1 : " +success1 + "Item2: "+ success2+"Item3: "+success3);
         //
         // 3. Test listing and inspecting items.
         //    - Call listItems() to verify current highest bids and reserve prices.
         //    - Optionally call getSpec() for a specific item.
         //
-        ListReply iArr = stub.listItems(Empty.newBuilder().build());
+         ListReply iArr = stub.listItems(Empty.newBuilder().build());
         for (Item i : iArr.getItemsList()) {
             System.out.println(
                 "ID=" + i.getItemId() +
@@ -55,7 +56,7 @@ public class AuctionClient {
         //    - Print the returned AuctionResult.
         AuctionResult res = stub.closeAuction(CloseRequest.newBuilder().setItemId(auc1).setUserId(alice).build());
         System.out.println(
-            "AuctionResult: item=" + res.getItemId() +
+            "Closed AuctionResult: item=" + res.getItemId() +
             ", winner=" + res.getWinningUser() +
             ", price=" + res.getPrice()
         );
@@ -93,8 +94,8 @@ public class AuctionClient {
             "AuctionResult: item=" + res3.getItemId() +
             ", winner=" + res3.getWinningUser() +
             ", price=" + res3.getPrice()
-            );
-        // 6. Print a summary of expected vs. actual outcomes for basic validation.
+            ); 
+        // 6. Print a summary of expected vs. actual outcomes for basic validation. 
 
         ch.shutdown();
     }

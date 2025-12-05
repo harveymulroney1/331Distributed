@@ -20,7 +20,6 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
     private TreeMap<Long, LogEntry> log = new TreeMap<>(); 
 
     // ----- state machine (in-memory) -----
-    //TODO: declare/initialise state variables 
     ConcurrentHashMap<Integer,String> users = new ConcurrentHashMap<>();
     ConcurrentHashMap<Integer,AuctionItem> items = new ConcurrentHashMap<>();
     ConcurrentHashMap<Integer,AuctionItem> closedItems = new ConcurrentHashMap<>();
@@ -36,7 +35,6 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
     // ================= Auction (read-only calls are executed locally) =================
     @Override 
     public AuctionItem getSpec(int itemID) { 
-        //TODO
         return items.get(itemID);
     }
 
@@ -51,11 +49,15 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
     private int newAuction(int userID, AuctionSaleItem item)
     {
         //TODO
-        if(users.containsKey(userID)){return -1;}
+        if(!users.containsKey(userID)){
+        System.out.println("Users not found");
+
+            return -1;}
         int ID = itemID.incrementAndGet();
         AuctionItem a = new AuctionItem(ID, item.name, item.description,item.reservePrice);
         items.put(ID,a);
         itemOwners.put(ID,userID);
+        System.out.println("Int ID:"+ID);
         return ID;
         
         
@@ -64,7 +66,9 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
     // NOTE: this is now a local function that may be used to update local state 
     private AuctionResult closeAuction(int userID, int itemID){
         //TODO
-        if(!items.containsKey(itemID)){return null;}
+        if(!items.containsKey(itemID)){
+            System.out.println("Items doesnt contain key - error returning null.");
+            return null;}
         AuctionItem i = items.get(itemID);
         if(itemOwners.get(itemID) == userID && !closedItems.containsKey(itemID)){
             closedItems.put(itemID,i);
@@ -132,7 +136,7 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
             if(ackCount>=majority(memberList.size()))
             {
                 // Step 3.1: Locally execute the operation on self (as the leader) - you may use apply(), 
-                apply(op);
+                OperationResult opResult = apply(op);
                 lastApplied = seq;
                 //set the operation in the log as committed, and update any other state variables, if needed
                 LogEntry entry = log.get(seq);
@@ -148,8 +152,11 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
                         
                     } catch (Exception e) {
                         // TODO: handle exception
+                        return OperationResult.fail("Error on committing to all replicas");
                     }
                 }
+                
+                return opResult;
                 
                 
             }
@@ -157,9 +164,9 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
             // Step 4: If a majority quorum is not achieved (or in case of other errors), return OperationResult.fail("") and provide a description of the error in the fail() method
             return OperationResult.fail("Error Majority not reached");
            }
-        
+       
 
-        return null;
+        
     }
 
     // Helper method to compute the required number of replicas to achieve majority given the number of the members
@@ -211,6 +218,7 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
                     
                 } catch (Exception e) {
                     // TODO: handle exception
+                    System.out.println("Error detected on commit upto");
                     return false;
                 }
             }
