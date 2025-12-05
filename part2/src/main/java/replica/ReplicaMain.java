@@ -18,13 +18,27 @@ public class ReplicaMain {
         Registry reg = LocateRegistry.getRegistry();
         reg.rebind(name, r);
         System.out.println("Replica " + id + " bound as " + name);
-        
+        FrontEndAdmin fe = (FrontEndAdmin) reg.lookup("FrontEnd");
+        String seqName = fe.getCurrentSequencerName(); // leader
         //TODO (suggested high-level steps):
         // Step 1: Ask the front-end to find out who the current sequencer (leader) is. If the answer is null (no leader), then register with the front-end (registerReplica)
+        
+        String leaderStr = fe.getCurrentSequencerName();
+        if(leaderStr == null)
+        {
+            fe.registerReplica();
+            String leaderStr = fe.findLeaderName();
+        }
+        ReplicatedAuction leader = new ReplicaImpl(leaderStr); // RepAuc to use it.
         // Step 2: Retrieve any missing committed log entries from the leader 
+        //ReplicatedAuction sequencer = r.lookup(leaderStr);
+        List<LogEntry> leader.getEntriesAfter(r.getLastCommittedSeqNo()); // gets missing entries
+        
         // Step 3: Locally execute any new committed (previously missing) operations that were added to the log in the previous step
+        
         // Step 4: Now that the replica is ready to serve requests, register with the front-end (front-end maintains replica membership) 
-
+        fe.registerReplica();
+        
         //NOTE: you may skip steps 1--3 and only do step 4 in which case criterion 2.3 will not be satisfied
 
     }

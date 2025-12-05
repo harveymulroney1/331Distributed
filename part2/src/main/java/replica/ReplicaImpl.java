@@ -59,6 +59,7 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
         itemOwners.put(ID,userID);
         return ID;
         
+        
     }
 
     // NOTE: this is now a local function that may be used to update local state 
