@@ -1,7 +1,6 @@
 package replica;
 
 import common.*;
-import frontend.AuctionResult;
 
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.RemoteException;
@@ -185,12 +184,14 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
     public boolean commitUpTo(long seqNo) {
 
         //TODO (suggested high-level steps):
+        System.out.println("(DEBUG)Seq Number to commitUpTo"+seqNo);
         // Step 1: Commit the local log entries upto seqNo if there are no missing log entries
         for(long i = this.lastCommitted+1;i<=seqNo;i++)
         {
             LogEntry entry = log.get(i);
             if(entry==null)
             {
+                System.out.println("(DEBUG) Entry is Null - fetching missing entries");
                     // Step 2: If there are missing entries before seqNo in the local log, pull them from the leader (using getEntriesAfter)
                 try {
                     String leader = findLeaderName();
@@ -198,6 +199,7 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
                     List<LogEntry> missing =  repLeader.getEntriesAfter(i-1);
                     for(LogEntry le : missing)
                     {
+                        System.out.println("(DEBUG) In Log Entry Loop - missing");
                         // Step 3: Execute and commit the new operation(s) - you may use apply() on each operation
                         le.committed = true;
                         log.put(le.seqNo,le);
@@ -215,6 +217,7 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
             entry.committed = true;
             lastApplied=i;
             lastCommitted=i;
+            System.out.println("(DEBUG) Commited, applied entry.");
         }
         return true;
     }

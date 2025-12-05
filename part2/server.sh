@@ -36,7 +36,10 @@ echo "Starting rmiregistry..."
 rmiregistry -J-Djava.class.path=target/classes "$REG_PORT" &
 write_pid "rmiregistry" $!
 sleep 1   # give registry a moment
-
+echo "Starting FrontEnd..."
+( mvn -q exec:java -Dexec.mainClass="${FE_MAIN}" ) &
+write_pid "frontend" $!
+sleep 2
 echo "Starting Replica1 ..."
 ( mvn -q exec:java -Dexec.mainClass="${SV_MAIN}" -Dexec.args="1") &
 write_pid "replica1" $!
@@ -50,9 +53,7 @@ echo "Starting Replica3..."
 write_pid "replica3" $!
 sleep 1   # ensure server binds before FE connects
 #o Launches the front-end.
-echo "Starting FrontEnd..."
-( mvn -q exec:java -Dexec.mainClass="${FE_MAIN}" ) &
-write_pid "frontend" $!
+
 
 echo "System ready within ~5 seconds."
 echo "PID files in ${PID_DIR}."

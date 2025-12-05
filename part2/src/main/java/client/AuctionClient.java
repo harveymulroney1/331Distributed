@@ -23,9 +23,9 @@ public class AuctionClient {
         // 1. Start a few auctions using one or more of the registered users.
         //    - Construct and send NewAuctionRequest messages.
         //    - Print returned item IDs.
-        int auc1 = stub.newAuction(NewAuctionRequest.newBuilder().setUserId(alice).setName("Monster White").setDescription("Energy Drink").setReservePrice(2)).build().getUserId();
-        int auc2 = stub.newAuction(NewAuctionRequest.newBuilder().setUserId(bob).setName("Lenovo Keyboard").setDescription("Qwerty Keys").setReservePrice(45)).build().getUserId();
-        int auc3 = stub.newAuction(NewAuctionRequest.newBuilder().setUserId(carol).setName("Mouse").setDescription("Computer Controller").setReservePrice(25)build()).getUserId();  
+        int auc1 = stub.newAuction(NewAuctionRequest.newBuilder().setUserId(alice).setName("Monster White").setDescription("Energy Drink").setReservePrice(2).build()).getItemId();
+        int auc2 = stub.newAuction(NewAuctionRequest.newBuilder().setUserId(bob).setName("Lenovo Keyboard").setDescription("Qwerty Keys").setReservePrice(45).build()).getItemId();
+        int auc3 = stub.newAuction(NewAuctionRequest.newBuilder().setUserId(carol).setName("Mouse").setDescription("Computer Controller").setReservePrice(25).build()).getItemId();  
 
         //
         // 2. Have multiple users place bids on these items.
