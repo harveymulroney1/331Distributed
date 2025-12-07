@@ -35,7 +35,8 @@ public class FrontEndImpl extends AuctionServiceGrpc.AuctionServiceImplBase {
             resp.onNext(NewAuctionReply.newBuilder().setItemId(itemID).build());
             resp.onCompleted();
         } catch (Exception e) {
-            resp.onError(e);
+            resp.onNext(NewAuctionReply.newBuilder().setItemId(-1).build());
+            resp.onCompleted();
         }
 
     }
@@ -108,7 +109,7 @@ public class FrontEndImpl extends AuctionServiceGrpc.AuctionServiceImplBase {
             }
             // Otherwise, map fields to a gRPC Item and return it.
         } catch (Exception e) {
-            resp.onNext(Item.newBuilder().setItemId(0).setName("").setDescription("").setReservePrice(0).setHighestBid(0).build())
+            resp.onNext(Item.newBuilder().setItemId(0).setName("").setDescription("").setReservePrice(0).setHighestBid(0).build()); // null
             resp.onCompleted();
             
         }
@@ -126,8 +127,11 @@ public class FrontEndImpl extends AuctionServiceGrpc.AuctionServiceImplBase {
                 resp.onNext(AuctionResult.newBuilder().setItemId(0).setWinningUser(0).setPrice(0).build());
                 resp.onCompleted();
             }          
-            resp.onNext(AuctionResult.newBuilder().setItemId(res.itemID).setWinningUser(res.winningUser).setPrice(res.price).build()); 
-            resp.onCompleted();
+            else{
+                resp.onNext(AuctionResult.newBuilder().setItemId(res.itemID).setWinningUser(res.winningUser).setPrice(res.price).build()); 
+                resp.onCompleted();
+            }
+
         } catch (Exception e) {
             resp.onNext(AuctionResult.newBuilder().setItemId(0).setWinningUser(0).setPrice(0).build());
             resp.onCompleted();

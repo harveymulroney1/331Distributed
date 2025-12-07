@@ -141,7 +141,7 @@ public class FrontEndImpl extends AuctionServiceGrpc.AuctionServiceImplBase impl
                 resp.onCompleted();
             }
             else{
-                resp.onError(Status.UNAVAILABLE.withDescription("Error on Registering").asRuntimeException());
+                resp.onError(Status.UNAVAILABLE.withDescription(res.error).asRuntimeException());
             }
 
         } catch (Exception e) {

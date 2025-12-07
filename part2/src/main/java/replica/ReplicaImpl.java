@@ -121,7 +121,7 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
         // Step 2: Propose the operation to the rest of the replicas in the memberList (i.e., call propose remote method on members *excluding self* and ignore any unreachable replicas)
         int ackCount =1; // 1 bc leader acks
         for(String rName : memberList){
-            if(rName.equals(this.myName))
+            if(!rName.equals(this.myName))
             {
                 try {
                     ReplicatedAuction repAuc = lookup(rName);
@@ -135,6 +135,7 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
             }
         }
         // Step 3: If majority of replicas acknowledges (assume leader acks), then:
+        System.out.println("Ack Count: "+ackCount + "MemberList: "+memberList.size());
             if(ackCount>=majority(memberList.size()))
             {
                 // Step 3.1: Locally execute the operation on self (as the leader) - you may use apply(), 
@@ -166,6 +167,7 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
             }
            else{
             // Step 4: If a majority quorum is not achieved (or in case of other errors), return OperationResult.fail("") and provide a description of the error in the fail() method
+            System.out.println("Error Majority not reached.");
             return OperationResult.fail("Error Majority not reached");
            }
        
