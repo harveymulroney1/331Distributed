@@ -3,6 +3,7 @@ package client;
 import frontend.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
 
 // A sample client which performs basic checks
 
@@ -68,33 +69,66 @@ public class AuctionClient {
         //    - Bidding below reserve price.
         //    - Closing an auction twice.
         //    - Closing an auction by a non-owner.
-        //
-        boolean success4 = stub.bid(BidRequest.newBuilder().setItemId(18).setUserId(carol).setPrice(12).build()).getSuccess();
+        
+        try {
+            boolean success4 = stub.bid(BidRequest.newBuilder().setItemId(18).setUserId(carol).setPrice(12).build()).getSuccess();
             System.out.println("Non Existent Item: EXP(Null - Failed to Bid) Actual: "+success4);
+        } catch (StatusRuntimeException e) {
+            // TODO: handle exception
+            var code = e.getStatus().getCode();
+            var msg = e.getStatus().getDescription();
+            System.out.println("Error on Bid: "+code+" Description: "+msg);
+
+        }
+
         //    - Bidding below reserve price.
             System.out.println("Trying below reserve item now:");
+            try {
+                boolean success5 = stub.bid(BidRequest.newBuilder().setItemId(auc2).setUserId(carol).setPrice(5).build()).getSuccess();
+                System.out.println("Below Reserve Price: EXP(Error - Failed to Bid - Below Reserve) Actual: "+success5);
+            } catch (StatusRuntimeException e) {
+                // TODO: handle exception
+                var code = e.getStatus().getCode();
+                var msg = e.getStatus().getDescription();
+                System.out.println("Error on Bid: "+code+" Description: "+msg);
+            }
 
-            boolean success5 = stub.bid(BidRequest.newBuilder().setItemId(auc2).setUserId(carol).setPrice(5).build()).getSuccess();
-            System.out.println("Below Reserve Price: EXP(Error - Failed to Bid - Below Reserve) Actual: "+success5);
         //    - Closing an auction twice.
-        AuctionResult res2 = stub.closeAuction(CloseRequest.newBuilder().setItemId(auc1).setUserId(alice).build());
-        System.out.println("Close Auction Twice: EXP(Error - Auction already closed) Actual: ");
+        try {
+            AuctionResult res2 = stub.closeAuction(CloseRequest.newBuilder().setItemId(auc1).setUserId(alice).build());
+            System.out.println("Close Auction Twice: EXP(Error - Auction already closed) Actual: ");
                 System.out.println(
-            "AuctionResult: item=" + res2.getItemId() +
-            ", winner=" + res2.getWinningUser() +
-            ", price=" + res2.getPrice()
+                "AuctionResult: item=" + res2.getItemId() +
+                ", winner=" + res2.getWinningUser() +
+                ", price=" + res2.getPrice()
             );
-        //    - Closing an auction by a non-owner.
-        AuctionResult res3 = stub.closeAuction(CloseRequest.newBuilder().setItemId(auc3).setUserId(bob).build());
+        } catch (StatusRuntimeException e) {
+                // TODO: handle exception
+            var code = e.getStatus().getCode();
+            var msg = e.getStatus().getDescription();
+            System.out.println("Error on Close Auction: "+code+" Description: "+msg);
+        }
 
-        //
-        // 6. Print a summary of expected vs. actual outcomes for basic validation.
-        System.out.println("Close by non owner: EXP(Error - Not owner) Actual: ");
+
+        //    - Closing an auction by a non-owner.
+        try {
+            AuctionResult res3 = stub.closeAuction(CloseRequest.newBuilder().setItemId(auc3).setUserId(bob).build());
+            // 6. Print a summary of expected vs. actual outcomes for basic validation.
+            System.out.println("Close by non owner: EXP(Error - Not owner) Actual: ");
                 System.out.println(
             "AuctionResult: item=" + res3.getItemId() +
             ", winner=" + res3.getWinningUser() +
             ", price=" + res3.getPrice()
             ); 
+            } 
+        catch (StatusRuntimeException e) {
+            // TODO: handle exception
+            var code = e.getStatus().getCode();
+            var msg = e.getStatus().getDescription();
+            System.out.println("Error on Close Auction: "+code+" Description: "+msg);
+        }
+
+
         // 6. Print a summary of expected vs. actual outcomes for basic validation. 
 
         ch.shutdown();

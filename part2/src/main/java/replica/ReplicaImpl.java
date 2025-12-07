@@ -115,12 +115,13 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
         //TODO (suggested high-level steps):
         // Step 1: Add the operation to the local log
         long seq = lastSeqAssigned+=1;
+        if(log.containsKey(seq)){seq++;}
         LogEntry newEntry = new LogEntry(seq, op);
         log.put(seq,newEntry);
         // Step 2: Propose the operation to the rest of the replicas in the memberList (i.e., call propose remote method on members *excluding self* and ignore any unreachable replicas)
         int ackCount =1; // 1 bc leader acks
         for(String rName : memberList){
-            if(rName!=this.myName)
+            if(rName.equals(this.myName))
             {
                 try {
                     ReplicatedAuction repAuc = lookup(rName);
@@ -128,6 +129,7 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
                     if(ok){ackCount++;}
                 } catch (Exception e) {
                     // unreachable
+                    continue;
                 }
 
             }
@@ -152,7 +154,9 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
                         
                     } catch (Exception e) {
                         // TODO: handle exception
-                        return OperationResult.fail("Error on committing to all replicas");
+                        System.out.println("(DEBUG) "+r+" Unavailable while updating its log");
+                        continue;
+                        //return OperationResult.fail("Error on committing to all replicas");
                     }
                 }
                 
@@ -213,6 +217,11 @@ public class ReplicaImpl extends UnicastRemoteObject implements ReplicatedAuctio
                         apply(le.op);
                         lastApplied=i;
                         lastCommitted=i;
+
+                    }
+                    for(long s : log.keySet())
+                    {
+                        System.out.println("(DEBUG) Seq Number in missing: "+s);
                     }
                     break;
                     
